@@ -1,0 +1,47 @@
+# StemLab Docker Compose - GPU Version (NVIDIA)
+# Web interface accessible at http://localhost:7860
+#
+# Requirements: 
+#   - NVIDIA GPU with CUDA support
+#   - NVIDIA Container Toolkit installed
+#   - Docker Desktop with GPU support enabled
+#
+# Usage: docker-compose -f docker-compose.gpu.yml up
+
+services:
+  stemlab-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    image: stemlab:gpu
+    container_name: stemlab-gpu
+    
+    # NVIDIA GPU access
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    
+    # Environment variables
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    
+    # Expose Gradio web interface
+    ports:
+      - "7860:7860"
+    
+    # Volumes for audio input/output
+    volumes:
+      - ./input:/data/input
+      - ./output:/data/output
+    
+    # Keep container running
+    stdin_open: true
+    tty: true
+    
+    # Restart policy
+    restart: unless-stopped

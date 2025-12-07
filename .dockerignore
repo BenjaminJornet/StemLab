@@ -1,0 +1,43 @@
+# Virtual environments
+venv*/
+.venv/
+env/
+
+# Build artifacts
+dist/
+build/
+*.spec
+*.exe
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Logs
+*.log
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Test files
+tests/
+*.test.py

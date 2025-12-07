@@ -1,0 +1,28 @@
+# StemLab Docker Compose - CPU Version
+# Web interface accessible at http://localhost:7860
+#
+# Usage: docker-compose -f docker-compose.cpu.yml up
+
+services:
+  stemlab-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpu
+    image: stemlab:cpu
+    container_name: stemlab-cpu
+    
+    # Expose Gradio web interface
+    ports:
+      - "7860:7860"
+    
+    # Volumes for audio input/output
+    volumes:
+      - ./input:/data/input
+      - ./output:/data/output
+    
+    # Keep container running
+    stdin_open: true
+    tty: true
+    
+    # Restart policy
+    restart: unless-stopped

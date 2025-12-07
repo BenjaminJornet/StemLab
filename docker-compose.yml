@@ -1,0 +1,51 @@
+# StemLab Docker Compose - Universal Configuration
+# Automatically detects GPU availability and configures accordingly
+#
+# Usage: 
+#   With GPU detection script: ./scripts/docker-run.sh (Linux/Mac) or scripts\docker-run.ps1 (Windows)
+#   Or manually:
+#     GPU:  USE_GPU=true docker-compose up --build
+#     CPU:  USE_GPU=false docker-compose up --build
+#
+# Web interface accessible at http://localhost:7860
+
+services:
+  stemlab:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USE_GPU: ${USE_GPU:-false}
+    image: stemlab:${USE_GPU:-cpu}
+    container_name: stemlab
+    
+    # GPU access (only used if NVIDIA runtime is available)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    
+    # Environment variables
+    environment:
+      - USE_GPU=${USE_GPU:-false}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    
+    # Expose Gradio web interface
+    ports:
+      - "7860:7860"
+    
+    # Volumes for audio input/output
+    volumes:
+      - ./input:/data/input
+      - ./output:/data/output
+    
+    # Keep container running
+    stdin_open: true
+    tty: true
+    
+    # Restart policy
+    restart: unless-stopped

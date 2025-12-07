@@ -1,0 +1,68 @@
+# StemLab - CPU Version
+# Professional-grade AI stem separation
+# Web interface powered by Gradio
+
+FROM python:3.10-slim-bookworm
+
+LABEL maintainer="Sunsets Acoustic"
+LABEL description="StemLab - AI Stem Separation (CPU Version)"
+LABEL version="2.0"
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies for audio processing
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libsndfile1 \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Create app directory
+WORKDIR /app
+
+# Copy requirements first for better layer caching
+COPY requirements.txt .
+
+# Install Python dependencies - CPU version
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir \
+    soundfile \
+    pydub \
+    numpy \
+    gradio && \
+    # Install PyTorch CPU version
+    pip install --no-cache-dir \
+    torch \
+    torchvision \
+    torchaudio \
+    --index-url https://download.pytorch.org/whl/cpu && \
+    # Install Demucs and audio-separator
+    pip install --no-cache-dir \
+    demucs \
+    audio-separator \
+    onnxruntime
+
+# Copy application source code
+COPY main.py .
+COPY src/ ./src/
+COPY resources/ ./resources/
+COPY start.sh /app/start.sh
+
+# Make start script executable and fix line endings
+RUN chmod +x /app/start.sh && \
+    sed -i 's/\r$//' /app/start.sh
+
+# Create directories for input/output
+RUN mkdir -p /data/input /data/output
+
+# Volume for audio files
+VOLUME ["/data/input", "/data/output"]
+
+# Expose Gradio port
+EXPOSE 7860
+
+# Default command
+CMD ["/bin/bash", "/app/start.sh"]
